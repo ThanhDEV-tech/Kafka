@@ -45,14 +45,12 @@
     enabled: yes
     state: started
 
-# Setup Kafka UI directory
 - name: Create kafka-ui directory
   file:
     path: "{{ kafka_ui_dir }}"
     state: directory
     mode: '0755'
 
-# Deploy config files
 - name: Deploy docker-compose.yml
   template:
     src: docker-compose.yml.j2
@@ -65,9 +63,8 @@
     dest: "{{ kafka_ui_dir }}/config.yml"
     mode: '0644'
 
-# Start Keycloak first
 - name: Start Keycloak
-  command: docker compose up -d keycloak
+  command: docker compose up -d keycloak postgres
   args:
     chdir: "{{ kafka_ui_dir }}"
 
@@ -77,20 +74,5 @@
     status_code: 200
   register: keycloak_health
   until: keycloak_health.status == 200
-  retries: 30
-  delay: 10
-
-# Start Kafka UI
-- name: Start Kafka UI
-  command: docker compose up -d kafka-ui
-  args:
-    chdir: "{{ kafka_ui_dir }}"
-
-- name: Wait for Kafka UI to be ready
-  uri:
-    url: "http://127.0.0.1:{{ kafka_ui_port }}/actuator/health"
-    status_code: 200
-  register: kafkaui_health
-  until: kafkaui_health.status == 200
   retries: 30
   delay: 10

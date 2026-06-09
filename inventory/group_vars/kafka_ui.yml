@@ -14,3 +14,5 @@ keycloak_admin_password: "12345678"
 keycloak_db_name: "keycloak"
 keycloak_db_user: "keycloak_user"
 keycloak_db_password: "12345678"
+
+keycloak_client_secret: "CHANGE_ME"

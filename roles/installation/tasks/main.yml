@@ -71,7 +71,7 @@
     owner: "{{ kafka_user }}"
     group: "{{ kafka_group }}"
     mode: '0644'
-    notify: Restart Kafka
+  notify: restart kafka
   
 - name: Format KRaft storage
   command: >
