@@ -81,9 +81,11 @@
   become: yes
   become_user: "{{ kafka_user }}"
   register: format_result
-  failed_when: 
+  failed_when:
     - format_result.rc != 0
     - "'already formatted' not in format_result.stdout"
+    - "'already formatted' not in format_result.stderr"
+  changed_when: "'already formatted' not in format_result.stdout and 'already formatted' not in format_result.stderr"
 
 - name: Fix ownership after format
   file:
