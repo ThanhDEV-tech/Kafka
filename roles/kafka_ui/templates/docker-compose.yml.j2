@@ -9,8 +9,6 @@ services:
       POSTGRES_PASSWORD: "{{ keycloak_db_password }}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      disable: true
 
   keycloak:
     image: quay.io/keycloak/keycloak:{{ keycloak_version }}
@@ -18,8 +16,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres   
 
     command: ["start-dev"]
 
@@ -39,17 +36,10 @@ services:
 
       JAVA_OPTS: "-Xms64m -Xmx192m"
 
-      KC_HEALTH_ENABLED: "true"
-      KC_METRICS_ENABLED: "true"
-
     mem_limit: 384m
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8080 || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 20
-      start_period: 120s
+      disable: true   
 
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
@@ -57,8 +47,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      keycloak:
-        {% comment %} condition: service_healthy {% endcomment %}
+      - keycloak   
 
     ports:
       - "{{ kafka_ui_port }}:8080"
