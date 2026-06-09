@@ -51,9 +51,10 @@ services:
 
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
 
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
