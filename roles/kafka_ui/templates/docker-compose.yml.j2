@@ -48,11 +48,11 @@ services:
     mem_limit: 384m
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8080 || exit 1"]
       interval: 20s
-      timeout: 10s
+      timeout: 5s
       retries: 20
-      start_period: 90s
+      start_period: 120s
 
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
