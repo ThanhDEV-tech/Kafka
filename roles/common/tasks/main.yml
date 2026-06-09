@@ -25,7 +25,9 @@
 
 - name: Disable swap
   command: swapoff -a
-  when: ansible_swaptotal_mb > 0
+  when:
+    - ansible_swaptotal_mb > 0
+    - disable_swap | default(false)
 
 - name: Remove swap from fstab
   lineinfile:
