@@ -10,10 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ keycloak_db_user }}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      disable: true
 
   keycloak:
     image: quay.io/keycloak/keycloak:{{ keycloak_version }}
@@ -61,7 +58,7 @@ services:
 
     depends_on:
       keycloak:
-        condition: service_healthy
+        {% comment %} condition: service_healthy {% endcomment %}
 
     ports:
       - "{{ kafka_ui_port }}:8080"
