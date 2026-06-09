@@ -10,10 +10,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ keycloak_db_user }}"]
-      interval: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/master"]
+      interval: 15s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   keycloak:
     image: quay.io/keycloak/keycloak:{{ keycloak_version }}
