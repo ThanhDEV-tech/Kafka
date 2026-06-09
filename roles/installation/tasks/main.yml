@@ -73,6 +73,11 @@
     mode: '0644'
   notify: restart kafka
   
+- name: Check if KRaft already formatted
+  stat:
+    path: "{{ kafka_data_dir }}/logs/meta.properties"
+  register: kraft_meta
+
 - name: Format KRaft storage
   command: >
     {{ kafka_base_dir }}/current/bin/kafka-storage.sh format
@@ -80,12 +85,7 @@
     -c {{ kafka_base_dir }}/current/config/server.properties
   become: yes
   become_user: "{{ kafka_user }}"
-  register: format_result
-  failed_when:
-    - format_result.rc != 0
-    - "'already formatted' not in format_result.stdout"
-    - "'already formatted' not in format_result.stderr"
-  changed_when: "'already formatted' not in format_result.stdout and 'already formatted' not in format_result.stderr"
+  when: not kraft_meta.stat.exists
 
 - name: Fix ownership after format
   file:
