@@ -10,10 +10,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/master"]
-      interval: 15s
+      test: ["CMD-SHELL", "pg_isready -U {{ keycloak_db_user }}"]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
 
   keycloak:
     image: quay.io/keycloak/keycloak:{{ keycloak_version }}
@@ -42,18 +42,15 @@ services:
 
       KC_HOSTNAME: {{ hostvars[inventory_hostname]['ansible_host'] }}
 
-    
-      JAVA_OPTS: "-Xms128m -Xmx256m -XX:MaxRAMPercentage=50"
+      JAVA_OPTS: "-Xms64m -Xmx192m"
 
-      
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
 
-    
     mem_limit: 512m
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/health/ready || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
