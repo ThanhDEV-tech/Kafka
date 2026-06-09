@@ -1,0 +1,33 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:{{ keycloak_version }}
+    container_name: keycloak
+    restart: unless-stopped
+    command:
+      - start
+      - --http-enabled=true
+      - --health-enabled=true
+    ports:
+      - "{{ keycloak_port }}:8080"
+      - "9000:9000"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: {{ keycloak_admin_user }}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: {{ keycloak_admin_password }}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://{{ hostvars[inventory_hostname]['ansible_host'] }}:5432/{{ keycloak_db_name }}
+      KC_DB_USERNAME: {{ keycloak_db_user }}
+      KC_DB_PASSWORD: {{ keycloak_db_password }}
+      KC_HOSTNAME: http://{{ hostvars[inventory_hostname]['ansible_host'] }}:{{ keycloak_port }}
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
+    container_name: kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - keycloak
+    ports:
+      - "{{ kafka_ui_port }}:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+    volumes:
+      - {{ kafka_ui_dir }}/config.yml:/etc/kafkaui/dynamic_config.yaml:ro

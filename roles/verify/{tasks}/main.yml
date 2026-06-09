@@ -1,0 +1,43 @@
+---
+- name: Check Kafka port 9092
+  wait_for:
+    port: 9092
+    timeout: 30
+
+- name: Check Kafka port 9093
+  wait_for:
+    port: 9093
+    timeout: 30
+
+- name: Check controller quorum
+  command: >
+    {{ kafka_base_dir }}/current/bin/kafka-metadata-quorum.sh
+    --bootstrap-server kafka-01:9092
+    describe --status
+  register: quorum_status
+  changed_when: false
+
+- name: Print quorum status
+  debug:
+    msg: "{{ quorum_status.stdout }}"
+
+- name: Check ISR
+  command: >
+    {{ kafka_base_dir }}/current/bin/kafka-topics.sh
+    --bootstrap-server kafka-01:9092
+    --describe
+  register: topic_status
+  changed_when: false
+
+- name: Check under-replicated partitions
+  command: >
+    {{ kafka_base_dir }}/current/bin/kafka-topics.sh
+    --bootstrap-server kafka-01:9092
+    --describe
+  register: under_replicated
+  changed_when: false
+
+- name: Fail if under-replicated partitions exist
+  fail:
+    msg: "Under-replicated partitions detected!"
+  when: "'UnderReplicatedPartitions: 1' in under_replicated.stdout"

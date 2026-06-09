@@ -1,0 +1,19 @@
+---
+- name: Setup common on all nodes
+  hosts: all
+  become: yes
+  roles:
+    - common
+    - java
+
+- name: Install Kafka cluster
+  hosts: kafka
+  become: yes
+  roles:
+    - installation
+
+- name: Verify Kafka cluster
+  hosts: kafka
+  become: yes
+  roles:
+    - verify

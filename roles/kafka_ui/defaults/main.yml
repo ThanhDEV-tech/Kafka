@@ -1,0 +1,11 @@
+---
+kafka_ui_dir: "/opt/kafka-ui"
+kafka_ui_port: 8080
+kafka_ui_version: "v1.3.0"
+keycloak_version: "26.6.1"
+keycloak_port: 8087
+keycloak_admin_user: "admin"
+keycloak_admin_password: "12345678"
+keycloak_db_name: "keycloak"
+keycloak_db_user: "keycloak_user"
+keycloak_db_password: "12345678"

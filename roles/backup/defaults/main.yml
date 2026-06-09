@@ -1,0 +1,2 @@
+---
+kafka_backup_dir: "/opt/kafka/backups"

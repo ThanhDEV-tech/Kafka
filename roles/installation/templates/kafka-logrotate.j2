@@ -1,0 +1,8 @@
+{{ kafka_base_dir }}/current/logs/*.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    copytruncate
+}

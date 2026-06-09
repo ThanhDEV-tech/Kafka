@@ -1,0 +1,64 @@
+---
+- name: Find latest backup if version not specified
+  shell: "ls -t {{ kafka_backup_dir }} | head -1"
+  register: latest_backup
+  when: backup_version is not defined
+
+- name: Set backup version to latest
+  set_fact:
+    backup_version: "{{ latest_backup.stdout }}"
+  when: backup_version is not defined
+
+- name: Verify backup exists
+  stat:
+    path: "{{ kafka_backup_dir }}/{{ backup_version }}"
+  register: backup_stat
+
+- name: Fail if backup not found
+  fail:
+    msg: "Backup version {{ backup_version }} not found!"
+  when: not backup_stat.stat.exists
+
+- name: Stop Kafka service
+  systemd:
+    name: kafka
+    state: stopped
+
+- name: Restore server.properties
+  copy:
+    src: "{{ kafka_backup_dir }}/{{ backup_version }}/server.properties"
+    dest: "{{ kafka_base_dir }}/current/config/server.properties"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    remote_src: yes
+
+- name: Restore KRaft metadata
+  unarchive:
+    src: "{{ kafka_backup_dir }}/{{ backup_version }}/kraft-metadata.tar.gz"
+    dest: "/"
+    remote_src: yes
+
+- name: Fix ownership after restore
+  file:
+    path: "{{ item }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    recurse: yes
+  loop:
+    - "{{ kafka_base_dir }}"
+    - "{{ kafka_data_dir }}"
+
+- name: Start Kafka service
+  systemd:
+    name: kafka
+    state: started
+
+- name: Wait for Kafka to be ready
+  wait_for:
+    port: 9092
+    delay: 10
+    timeout: 60
+
+- name: Print restore summary
+  debug:
+    msg: "Restore completed from backup version: {{ backup_version }}"

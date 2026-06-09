@@ -1,0 +1,21 @@
+[Unit]
+Description=Apache Kafka Server (KRaft)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ kafka_user }}
+Group={{ kafka_group }}
+Environment="KAFKA_HEAP_OPTS={{ kafka_heap_opts }}"
+Environment="KAFKA_JVM_PERFORMANCE_OPTS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -Djava.awt.headless=true"
+ExecStart={{ kafka_base_dir }}/current/bin/kafka-server-start.sh {{ kafka_base_dir }}/current/config/server.properties
+ExecStop={{ kafka_base_dir }}/current/bin/kafka-server-stop.sh
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=100000
+LimitNPROC=65535
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+---
+- name: Create backup directory
+  file:
+    path: "{{ kafka_backup_dir }}"
+    state: directory
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: '0755'
+
+- name: Deploy backup script
+  template:
+    src: kafka-backup.sh.j2
+    dest: /usr/local/bin/kafka-backup.sh
+    mode: '0755'
+
+- name: Setup backup cronjob
+  cron:
+    name: "Kafka daily backup"
+    minute: "0"
+    hour: "2"
+    job: "/usr/local/bin/kafka-backup.sh >> /var/log/kafka-backup.log 2>&1"
+    user: "{{ kafka_user }}"

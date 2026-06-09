@@ -1,0 +1,35 @@
+#!/bin/bash
+BACKUP_DIR="{{ kafka_backup_dir }}"
+TIMESTAMP=$(date +%Y-%m-%d_%H-%M)
+BACKUP_PATH="${BACKUP_DIR}/${TIMESTAMP}"
+KAFKA_HOME="{{ kafka_base_dir }}/current"
+BOOTSTRAP="kafka-01:9092"
+RETAIN_DAYS=7
+
+echo "=== Kafka Backup Start: ${TIMESTAMP} ==="
+
+# Create backup directory
+mkdir -p "${BACKUP_PATH}"
+
+# Backup topic metadata
+echo "Backing up topic metadata..."
+${KAFKA_HOME}/bin/kafka-topics.sh \
+  --bootstrap-server ${BOOTSTRAP} \
+  --describe > "${BACKUP_PATH}/kafka-topics-backup.txt"
+
+# Backup server.properties
+echo "Backing up server.properties..."
+cp {{ kafka_base_dir }}/current/config/server.properties \
+  "${BACKUP_PATH}/server.properties"
+
+# Backup KRaft metadata
+echo "Backing up KRaft metadata..."
+tar -czf "${BACKUP_PATH}/kraft-metadata.tar.gz" \
+  {{ kafka_metadata_dir }}
+
+# Remove old backups — keep last 7
+echo "Cleaning old backups..."
+find "${BACKUP_DIR}" -maxdepth 1 -type d \
+  -mtime +${RETAIN_DAYS} -exec rm -rf {} \;
+
+echo "=== Backup completed: ${BACKUP_PATH} ==="

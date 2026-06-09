@@ -1,0 +1,6 @@
+---
+- name: Restore Kafka
+  hosts: kafka
+  become: yes
+  roles:
+    - restore

@@ -1,0 +1,25 @@
+---
+- name: Install Java 17
+  apt:
+    name: openjdk-17-jdk
+    state: present
+    update_cache: yes
+
+- name: Install required packages
+  apt:
+    name:
+      - curl
+      - wget
+      - vim
+      - net-tools
+      - unzip
+    state: present
+
+- name: Verify Java version
+  command: java -version
+  register: java_version
+  changed_when: false
+
+- name: Print Java version
+  debug:
+    msg: "{{ java_version.stderr }}"

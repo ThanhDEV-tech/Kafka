@@ -1,0 +1,116 @@
+---
+- name : Create Kafka group
+  group:
+    name: "{{ kafka_group }}"
+    state: present
+    system: yes
+
+- name : Create Kafka user
+  user:
+    name: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    create_home: yes
+    shell: /usr/sbin/nologin
+    system: yes
+    state: present
+
+- name: Create Kafka directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: '0755'
+  loop:
+    - "{{ kafka_base_dir }}"
+    - "{{ kafka_data_dir }}"
+    - "{{ kafka_log_dir }}"
+    - "{{ kafka_metadata_dir }}"
+
+- name : Download Kafka
+  get_url:
+    url: "https://archive.apache.org/dist/kafka/{{ kafka_version }}/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/tmp/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    mode: '0644'
+
+- name: Extract Kafka
+  unarchive:
+    src: "/tmp/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    dest: "{{ kafka_base_dir }}"
+    remote_src: yes
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: Create symlink
+  file:
+    src: "{{ kafka_base_dir }}/kafka_{{ scala_version }}-{{ kafka_version }}"
+    dest: "{{ kafka_base_dir }}/current"
+    state: link
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+  
+- name: Generate cluster UUID on kafka-01
+  command: "{{ kafka_base_dir }}/current/bin/kafka-storage.sh random-uuid"
+  register: kafka_cluster_uuid
+  run_once: true
+  delegate_to: kafka-01
+
+- name: Set cluster UUID fact
+  set_fact:
+    kafka_cluster_id: "{{ kafka_cluster_uuid.stdout }}"
+  run_once: true
+
+- name: Share cluster UUID to all nodes
+  set_fact:
+    kafka_cluster_id: "{{ hostvars['kafka-01']['kafka_cluster_id'] }}"
+
+- name: Deploy server.properties
+  template:
+    src: server.properties.j2
+    dest: "{{ kafka_base_dir }}/current/config/server.properties"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: '0644'
+    notify: Restart Kafka
+  
+- name: Format KRaft storage
+  command: >
+    {{ kafka_base_dir }}/current/bin/kafka-storage.sh format
+    -t {{ kafka_cluster_id }}
+    -c {{ kafka_base_dir }}/current/config/server.properties
+  become: yes
+  become_user: "{{ kafka_user }}"
+  register: format_result
+  failed_when: 
+    - format_result.rc != 0
+    - "'already formatted' not in format_result.stdout"
+
+- name: Fix ownership after format
+  file:
+    path: "{{ item }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    recurse: yes
+  loop:
+    - "{{ kafka_base_dir }}"
+    - "{{ kafka_data_dir }}"
+
+- name: Deploy systemd service
+  template:
+    src: kafka.service.j2
+    dest: /etc/systemd/system/kafka.service
+    mode: '0644'
+  notify: restart kafka
+
+- name: Deploy log rotation config
+  template:
+    src: kafka-logrotate.j2
+    dest: /etc/logrotate.d/kafka
+    mode: '0644'
+
+- name: Enable and start kafka
+  systemd:
+    name: kafka
+    enabled: yes
+    state: started
+    daemon_reload: yes

@@ -1,0 +1,76 @@
+kafka:
+  clusters:
+    - name: clusters
+      bootstrapServers: "kafka-01:9092,kafka-02:9092,kafka-03:9092"
+      auth:
+        type: OAUTH2
+        oauth2:
+          client:
+            keycloak:
+              clientId: kafka-ui
+              clientSecret: "{{ keycloak_client_secret }}"
+              scope: openid
+              issuer-uri: "http://{{ hostvars[inventory_hostname]['ansible_host'] }}:{{ keycloak_port }}/realms/prod"
+              user-name-attribute: preferred_username
+              client-name: keycloak
+              provider: keycloak
+              custom-params:
+                type: oauth
+                roles-field: groups
+rbac:
+  roles:
+    - name: "admins"
+      clusters:
+        - clusters
+      subjects:
+        - provider: oauth
+          type: role
+          value: "Admin"
+      permissions:
+        - resource: applicationconfig
+          actions: all
+        - resource: clusterconfig
+          actions: all
+        - resource: topic
+          value: ".*"
+          actions: all
+        - resource: consumer
+          value: ".*"
+          actions: all
+        - resource: schema
+          value: ".*"
+          actions: all
+        - resource: connect
+          value: ".*"
+          actions: all
+        - resource: ksql
+          actions: all
+        - resource: acl
+          actions: [ view ]
+    - name: "readonly"
+      clusters:
+        - clusters
+      subjects:
+        - provider: oauth
+          type: role
+          value: "Viewer"
+      permissions:
+        - resource: clusterconfig
+          actions: [ "view" ]
+        - resource: topic
+          value: ".*"
+          actions:
+            - VIEW
+            - MESSAGES_READ
+            - ANALYSIS_VIEW
+        - resource: consumer
+          value: ".*"
+          actions: [ view ]
+        - resource: schema
+          value: ".*"
+          actions: [ view ]
+        - resource: connect
+          value: ".*"
+          actions: [ view ]
+        - resource: acl
+          actions: [ view ]

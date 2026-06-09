@@ -1,0 +1,20 @@
+---
+# Heap size — thấp cho lab t2.micro
+kafka_heap_opts: "-Xms512m -Xmx512m"
+
+# Broker config
+kafka_num_partitions: 3
+kafka_replication_factor: 3
+kafka_min_insync_replicas: 2
+kafka_log_retention_hours: 168
+kafka_log_segment_bytes: 536870912
+kafka_log_retention_bytes: 1500000000000
+
+# Controller quorum
+kafka_controller_quorum_voters: "1@kafka-01:9093,2@kafka-02:9093,3@kafka-03:9093"
+
+# Node IDs map
+kafka_node_ids:
+  kafka-01: 1
+  kafka-02: 2
+  kafka-03: 3
