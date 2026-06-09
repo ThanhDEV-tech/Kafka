@@ -19,11 +19,11 @@ services:
     image: quay.io/keycloak/keycloak:{{ keycloak_version }}
     container_name: keycloak
     restart: unless-stopped
+
     depends_on:
       postgres:
         condition: service_healthy
 
-    
     command:
       - start-dev
 
@@ -40,13 +40,20 @@ services:
       KC_DB_USERNAME: {{ keycloak_db_user }}
       KC_DB_PASSWORD: {{ keycloak_db_password }}
 
-      #fix warning + tránh lỗi hostname
       KC_HOSTNAME: {{ hostvars[inventory_hostname]['ansible_host'] }}
 
-      JAVA_OPTS_APPEND: "-Xms128m -Xmx256m"
+    
+      JAVA_OPTS: "-Xms128m -Xmx256m -XX:MaxRAMPercentage=50"
+
+      
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+
+    
+    mem_limit: 512m
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/health/ready"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health/ready || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -55,13 +62,17 @@ services:
     image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
     container_name: kafka-ui
     restart: unless-stopped
+
     depends_on:
       keycloak:
         condition: service_healthy
+
     ports:
       - "{{ kafka_ui_port }}:8080"
+
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
+
     volumes:
       - {{ kafka_ui_dir }}/config.yml:/etc/kafkaui/dynamic_config.yaml:ro
 
