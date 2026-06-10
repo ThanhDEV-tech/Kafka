@@ -45,6 +45,11 @@ services:
       - "{{ kafka_ui_port }}:8080"
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
+      AUTH_TYPE: "OAUTH2"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID: "kafka-ui"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTSECRET: "{{ keycloak_client_secret }}"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_SCOPE: "openid"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI: "{{ keycloak_alb_url }}/realms/prod"
     volumes:
       - "{{ kafka_ui_dir }}/config.yml:/etc/kafkaui/dynamic_config.yaml:ro"
     mem_limit: 256m
