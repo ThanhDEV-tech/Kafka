@@ -1,0 +1,6 @@
+---
+- name: Backup Kafka
+  hosts: kafka
+  become: yes
+  roles:
+    - backup
