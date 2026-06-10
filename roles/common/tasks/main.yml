@@ -10,7 +10,7 @@
       172.31.37.252 kafka-01
       172.31.42.127 kafka-02
       172.31.33.230 kafka-03
-      172.31.25.125 kafka-ui-01
+      172.31.34.4 kafka-ui-01
       172.31.19.172 kafka-ui-02
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
 
