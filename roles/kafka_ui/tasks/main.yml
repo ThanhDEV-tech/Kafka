@@ -63,10 +63,11 @@
     dest: "{{ kafka_ui_dir }}/config.yml"
     mode: '0644'
 
-- name: Start Keycloak
-  command: docker compose up -d keycloak postgres
+- name: Start Postgres and Keycloak
+  command: docker compose up -d postgres keycloak
   args:
     chdir: "{{ kafka_ui_dir }}"
+  become: yes
 
 - name: Wait for Keycloak to be ready
   uri:
@@ -74,5 +75,22 @@
     status_code: 200
   register: keycloak_health
   until: keycloak_health.status == 200
+  retries: 60
+  delay: 15
+  ignore_errors: yes
+
+- name: Start Kafka UI
+  command: docker compose up -d kafka-ui
+  args:
+    chdir: "{{ kafka_ui_dir }}"
+  become: yes
+
+- name: Wait for Kafka UI to be ready
+  uri:
+    url: "http://127.0.0.1:{{ kafka_ui_port }}/actuator/health"
+    status_code: 200
+  register: kafkaui_health
+  until: kafkaui_health.status == 200
   retries: 30
   delay: 10
+  ignore_errors: yes
