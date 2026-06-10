@@ -1,3 +1,54 @@
-inventory/hosts.ini
+# Ansible Vault & Secrets
 .vault_pass
+.vault_password
+vault_pass.txt
+*.vault
+
+# SSH Keys & Certificates
 *.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+known_hosts
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Sensitive inventory files
+inventory/hosts.ini
+inventory/host_vars/*.yml
+!inventory/host_vars/template.yml
+
+# Temporary files
+*.retry
+.DS_Store
+*.swp
+*.swo
+*~
+.#*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+
+# Build/Cache
+.cache/
+*.pyc
+__pycache__/
+.pytest_cache/
+dist/
+build/
+
+# Logs
+*.log
+logs/

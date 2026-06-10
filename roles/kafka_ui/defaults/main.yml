@@ -5,8 +5,10 @@ kafka_ui_version: "v1.3.0"
 keycloak_version: "26.6.1"
 keycloak_port: 8087
 keycloak_admin_user: "admin"
-keycloak_admin_password: "12345678"
+# Set via inventory/group_vars or environment variable
+keycloak_admin_password: "{{ lookup('env', 'KEYCLOAK_ADMIN_PASSWORD') }}"
 keycloak_db_name: "keycloak"
 keycloak_db_user: "keycloak_user"
-keycloak_db_password: "12345678"
+# Set via inventory/group_vars or environment variable
+keycloak_db_password: "{{ lookup('env', 'KEYCLOAK_DB_PASSWORD') }}"
 keycloak_alb_url: "http://kafka-alb-505898566.ap-southeast-1.elb.amazonaws.com:8087"
