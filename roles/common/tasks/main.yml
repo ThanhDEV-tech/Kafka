@@ -68,3 +68,10 @@
       kafka soft nofile 100000
       kafka hard nofile 100000
   when: inventory_hostname in groups['kafka']
+
+- name: Add ALB hostname to /etc/hosts for hairpin NAT workaround
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_host }} {{ alb_hostname }}"
+    state: present
+  when: inventory_hostname in groups['kafka_ui']

@@ -31,13 +31,15 @@ services:
       KC_DB_URL: "jdbc:postgresql://postgres:5432/{{ keycloak_db_name }}"
       KC_DB_USERNAME: "{{ keycloak_db_user }}"
       KC_DB_PASSWORD: "{{ keycloak_db_password }}"
-      KC_HOSTNAME: "{{ keycloak_alb_url }}"
+      KC_HOSTNAME: "http://{{ alb_hostname }}:{{ keycloak_port }}"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       JAVA_OPTS_APPEND: "-Xms128m -Xmx384m"
     mem_limit: 512m
 
   kafka-ui:
+    extra_hosts:
+      - "{{ alb_hostname }}:{{ ansible_host }}"
     image: ghcr.io/kafbat/kafka-ui:{{ kafka_ui_version }}
     container_name: kafka-ui
     restart: unless-stopped
@@ -47,14 +49,9 @@ services:
       - "{{ kafka_ui_port }}:8080"
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
-      AUTH_TYPE: "OAUTH2"
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID: "kafka-ui"
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTSECRET: "{{ keycloak_client_secret }}"
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_SCOPE: "openid"
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI: "{{ keycloak_alb_url }}/realms/prod"
     volumes:
-      - "{{ kafka_ui_dir }}/config.yml:/etc/kafkaui/dynamic_config.yaml:ro"
-    mem_limit: 256m
+      - {{ kafka_ui_dir }}/config.yml:/etc/kafkaui/dynamic_config.yaml:ro
+    mem_limit: 512m
 
 volumes:
   postgres_data:
