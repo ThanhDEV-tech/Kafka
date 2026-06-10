@@ -17,7 +17,7 @@ keycloak_db_password: "12345678"
 
 # ALB
 keycloak_alb_url: "http://kafka-alb-505898566.ap-southeast-1.elb.amazonaws.com:8087"
-
+keycloak_internal_url: "http://keycloak:8080"
 keycloak_client_secret: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           39353835316537643132373065383466313235323231346632663862376239663433396266663265
