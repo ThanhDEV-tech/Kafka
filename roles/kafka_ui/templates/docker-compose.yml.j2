@@ -22,6 +22,7 @@ services:
 
     ports:
       - "{{ keycloak_port }}:8080"
+      - "9090:9090"
 
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: "{{ keycloak_admin_user }}"
