@@ -1,3 +1,19 @@
+auth:
+  type: OAUTH2
+  oauth2:
+    client:
+      keycloak:
+        clientId: kafka-ui
+        clientSecret: "{{ keycloak_client_secret }}"
+        scope: openid
+        issuer-uri: "{{ keycloak_alb_url }}/realms/prod"
+        user-name-attribute: preferred_username
+        client-name: keycloak
+        provider: keycloak
+        custom-params:
+          type: oauth
+          roles-field: groups
+
 kafka:
   clusters:
     - name: clusters
