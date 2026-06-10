@@ -10,7 +10,7 @@ kafka:
               clientId: kafka-ui
               clientSecret: "{{ keycloak_client_secret }}"
               scope: openid
-              issuer-uri: "http://{{ hostvars[inventory_hostname]['ansible_host'] }}:{{ keycloak_port }}/realms/prod"
+              issuer-uri: "{{ keycloak_alb_url }}/realms/prod"
               user-name-attribute: preferred_username
               client-name: keycloak
               provider: keycloak
