@@ -94,3 +94,34 @@
   retries: 30
   delay: 10
   ignore_errors: yes
+
+- name: Copy realm export file to server
+  copy:
+    src: prod-realm.json
+    dest: /tmp/prod-realm.json
+    mode: '0644'
+
+- name: Import Keycloak realm via REST API
+  shell: |
+    TOKEN=$(curl -s -X POST \
+      "http://localhost:{{ keycloak_port }}/realms/master/protocol/openid-connect/token" \
+      -H "Content-Type: application/x-www-form-urlencoded" \
+      -d "username={{ keycloak_admin_user }}&password={{ keycloak_admin_password }}&grant_type=password&client_id=admin-cli" \
+      | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+    REALM_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
+      -H "Authorization: Bearer $TOKEN" \
+      "http://localhost:{{ keycloak_port }}/admin/realms/prod")
+
+    if [ "$REALM_EXISTS" = "200" ]; then
+      echo "Realm already exists, skipping import"
+    else
+      curl -s -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/json" \
+        -d @/tmp/prod-realm.json \
+        "http://localhost:{{ keycloak_port }}/admin/realms"
+      echo "Realm imported successfully"
+    fi
+  register: realm_import
+  changed_when: "'imported successfully' in realm_import.stdout"
