@@ -32,7 +32,8 @@ services:
       KC_DB_USERNAME: "{{ keycloak_db_user }}"
       KC_DB_PASSWORD: "{{ keycloak_db_password }}"
       KC_HOSTNAME: "{{ keycloak_alb_url }}"
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       JAVA_OPTS_APPEND: "-Xms128m -Xmx384m"
     mem_limit: 512m
 
