@@ -1,6 +1,6 @@
 ---
 - name: Setup common on all nodes
-  hosts: all
+  hosts: kafka
   become: yes
   roles:
     - common
@@ -18,8 +18,8 @@
   roles:
     - verify
 
-- name: Deploy Kafka UI and Keycloak
-  hosts: kafka_ui
-  become: yes
-  roles:
-    - kafka_ui
+# - name: Deploy Kafka UI and Keycloak
+#   hosts: kafka_ui
+#   become: yes
+#   roles:
+#     - kafka_ui

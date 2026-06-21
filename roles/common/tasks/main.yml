@@ -7,11 +7,9 @@
   blockinfile:
     path: /etc/hosts
     block: |
-      172.31.37.252 kafka-01
-      172.31.42.127 kafka-02
-      172.31.33.230 kafka-03
-      172.31.34.4 kafka-ui-01
-      172.31.19.172 kafka-ui-02
+      {% for host in groups['kafka'] %}
+      {{ hostvars[host]['ansible_host'] }} {{ host }}
+      {% endfor %}
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
 
 - name: Update OS
