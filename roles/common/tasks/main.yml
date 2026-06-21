@@ -32,20 +32,7 @@
     path: /etc/fstab
     regexp: '.*swap.*'
     state: absent
-
-- name: Create kafka data directories
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: '0755'
-  loop:
-    - "{{ kafka_data_dir }}"
-    - "{{ kafka_log_dir }}"
-    - "{{ kafka_metadata_dir }}"
-  when: inventory_hostname in groups['kafka']
-
+    
 - name: Apply sysctl settings
   sysctl:
     name: "{{ item.name }}"
