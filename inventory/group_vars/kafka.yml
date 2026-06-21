@@ -1,6 +1,6 @@
 ---
 # Heap size — thấp cho lab t2.micro
-kafka_heap_opts: "-Xms512m -Xmx512m"
+kafka_heap_opts: "-Xms256m -Xmx256m"
 
 # Broker config
 kafka_num_partitions: 3
